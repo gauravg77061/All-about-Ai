@@ -29,9 +29,9 @@ SYSTEM_PROMPT="""
 
  Example:
  START: Hey, can you solev 2+3*5/10
- PLAN:{"step":"PLAN":"content":"Seems like,suer is interested n maths problem"}
- PLAN:{"step:"PLAN":"content":"lloking at the problem .we should solve this problem with the help of BODMAS method"}
- PLAN:{"step":"PLAN":"Content":"we should multipy 3*5 which is 15"}
+ PLAN:{"step":"PLAN":"content":"Seems like,user is interested in maths problem"}
+ PLAN:{"step:"PLAN":"content":"looking at the problem .we should solve this problem with the help of BODMAS method"}
+ PLAN:{"step":"PLAN":"Content":"we should multiply 3*5 which is 15"}
  PLAN:{"step":"PLAN":"content":"Now the equation is 2+15/10"}
   PLAN:{"step":"PLAN":"content":"we must perform divide that is equal to 1.5"}
 PLAN:{"step":"PLAN":"content":"Now the equation is 2+1.5"}
@@ -40,21 +40,37 @@ OUTPUT:{"step":"PLAN":"content":"Great, we have solved the problem"}
 
 """
 
-response=client.chat.completions.create(
-    model="gpt-4o-mini",
-    response_format={"type":"json_object"},
-    messages=[
-        {"role":"system","content":SYSTEM_PROMPT},
-        {"role":"user","content":"Hey can you add n numbers in javascript "},
-        #manulayy appending in chat history
-        {"role":"assistant","content": json.dumps({"step":"START","content":"you want a javascript code to add n numbers"})},
-        {"role":"assistant","content": json.dumps({"step": "PLAN", "content":"First, I need to clarify how the user wants to provide the n numbers, either through an array or through user input."})},
-        {"role":"assistant","content": json.dumps({"step": "PLAN", "content": "Assuming the user wants to input numbers using an array, I can outline a method to use the reduce function in JavaScript."})},
-        {"role":"assistant","content": json.dumps({"role":"assistant","content": json.dumps({"step":"START","content":"you want a javascript code to add n numbers"})})},
-        {"role":"assistant","content": json.dumps({"step": "PLAN", "content": "I will create a function that takes an array of numbers and returns the sum."})},
-        {"role":"assistant","content": json.dumps({"step": "PLAN", "content": "To implement this, I will use the Array.prototype.reduce method to sum up the numbers in the array."})},
-        {"role":"assistant","content": json.dumps({"step": "PLAN", "content": "Now, I will show the user a simple code snippet for the function."})}
-    ]
+print("\n\n\n")
 
-)
-print(response.choices[0].message.content)
+message_history=[
+    {"role":"system","content":SYSTEM_PROMPT},
+
+]
+
+
+user_query =input("✨💬 Type your message: ")
+
+message_history.append({"role":"user","content":user_query})
+
+while True:
+    response=client.chat.completions.create(
+        model="gpt-4o-mini",
+        response_format={"type":"json_object"},
+        messages=message_history
+    )
+
+    raw_result =(response.choices[0].message.content)
+    message_history.append({"role":"assistant","content":raw_result})
+    parsed_result=json.loads(raw_result)
+
+    if parsed_result.get("step") == 'START':
+        print("🔥" , parsed_result.get("content"))
+        continue
+    if parsed_result.get("step") == 'PLAN':
+        print("🧠 ", parsed_result.get('content'))
+        continue
+    if parsed_result.get("step") == 'OUTPUT':
+        print("🤖" , parsed_result.get("content"))
+        break
+
+print("\n\n\n")

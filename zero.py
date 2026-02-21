@@ -8,10 +8,14 @@ load_dotenv()
 
 client=OpenAI()
 
+#Zero prompting
+
+SYSTEM_PROMPT="Your name is Coding Alexa.You shuld only ams coding related questions and if query is not related to coding just say sorry"
+
 response=client.chat.completions.create(
     model="gpt-4o-mini",
     messages=[
-        {"role":"system","content":"You are an expert in Ai and only and only ans coding related questions. That if query is not related to coding .Just say sorry and don not ans it"},
+        {"role":"system","content":SYSTEM_PROMPT},
         {"role":"user","content":"Hey can you tell me about even llop in node js"}
     ]
 

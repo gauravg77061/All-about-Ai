@@ -2,6 +2,8 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import requests
 import json
+from pydantic import BaseModel,Field
+from typing import Optional
 
 
 
@@ -45,6 +47,12 @@ Available Tools
 
 """
 
+class MMyOutFormat(BaseModel):
+    step:str = Field(...,description="The Id of the step. Example: PLAN,OUTPUT,TOOL,etc")
+    content: Optional[str]=Field(None,description="The optional string content for the step")
+    tool:Optional[str]=Field(None,description="The ID of the tool to call")
+    input:Optional[str]=Field(None,description="The input params for the tool")
+
 def get_weather(city:str):
     url=f"https://wttr.in/{city.lower()}?format=%C+%t"
     response=requests.get(url)
@@ -70,24 +78,23 @@ def main():
         message_history.append({"role" :"user" ,"content":user_query})
 
         while True:
-            response=client.chat.completions.create(
+            response=client.chat.completions.parse(
                 model="gpt-4o-mini",
-                response_format={"type" : "json_object"},
+                response_format=MMyOutFormat,
                 messages=message_history
             )
 
             raw=response.choices[0].message.content
             message_history.append({"role":"assistant","content":raw})
 
-            parsed =json.loads(raw)
-            step=parsed.get("step")
-
-            if step == 'START':
-                print("🔥" ,parsed.get("content"))
+            parsed_result=response.choices[0].message.parsed
+           
+            if parsed_result.step == 'START':
+                print("🔥" ,parsed_result.content)
                 continue
-            if parsed.get("step") == "TOOL":
-                tool_to_call=parsed.get("tool")
-                tool_input=parsed.get('input')
+            if parsed_result.step == "TOOL":
+                tool_to_call=parsed_result.tool
+                tool_input=parsed_result.input
                 print(f"🛠:{tool_to_call}( {tool_input})")
 
                 tool_response=available_tools[tool_to_call](tool_input)
@@ -96,11 +103,11 @@ def main():
                     {"step":"OBSERVE" ,"tool":tool_to_call,"input":tool_input,"output":tool_response}
                 )})
                 continue
-            if parsed.get("step") == 'PLAN':
-                print(f"🧠", parsed.get("content"))
+            if parsed_result.step == 'PLAN':
+                print(f"🧠", parsed_result.content)
                 continue
-            if parsed.get("step") == 'OUTPUT':
-                print(parsed.get("content"))
+            if parsed_result.step == 'OUTPUT':
+                print(parsed_result.content)
                 break
 
 main()

@@ -4,7 +4,8 @@ from  langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI   
+from langchain_openai import ChatOpenAI 
+from openai import OpenAI  
 
 
 load_dotenv()
@@ -40,7 +41,8 @@ vector_store=FAISS.from_documents(
 print("indexing of document done...")
 print("Total vectors stored:", vector_store.index.ntotal)
 
-llm=ChatOpenAI(model='gpt-4o-mini')
+# llm=ChatOpenAI(model='gpt-4o-mini')
+client=OpenAI()
 
 def retrieve_docs(query):
     results=vector_store.similarity_search(query,k=2)
@@ -52,11 +54,28 @@ def ask_question(query):
     
     context="\n\n".join([doc.page_content for doc in docs])
     
-    response=llm.invoke(
-        f"Answer only using this context:\n{context}\n\nQuestion: {query}"
+    System_prompt=f"""
+    you are a helpul AI Assistant who ansers user
+    querys based on the available context retrived 
+    from a pdf along with context
+    {context}
+    """
+    response=client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role":"system",
+                "content":"You are an AI assistant. Answer only from the given context."
+            },
+             {
+                "role": "user",
+                "content": f"Context:\n{context}\n\nQuestion: {query}"
+            }
+        ]
     )
     
-    return response.content 
+    
+    return response.choices[0].message.content
 
 while True:
     q = input("\nAsk question (type 'exit'): ")

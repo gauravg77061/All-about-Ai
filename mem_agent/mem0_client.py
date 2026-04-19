@@ -44,29 +44,32 @@ config={
 
 mem_client=Memory.from_config(config)
 
-user_query=input(">")
-
-response=client.chat.completions.create(
-    model="gpt-4.1-mini",
-    messages=[
-        {"role":"user","content":user_query}
-    ]
-)
-ai_response=response.choices[0].message.content
-
-print("AI",ai_response)
-
-mem_client.add(
+while True:
     
-    messages=[
-        {"role":"user","content":user_query},
-        {"role":"assistant","content":ai_response}
-    ],
-    # this is important 
-    user_id="Gaurav"
-)
 
-print("Memory has been saved ....")
+    user_query=input(">")
+
+    response=client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {"role":"user","content":user_query}
+        ]
+    )
+    ai_response=response.choices[0].message.content
+
+    print("AI",ai_response)
+
+    mem_client.add(
+        
+        messages=[
+            {"role":"user","content":user_query},
+            {"role":"assistant","content":ai_response}
+        ],
+        # this is important 
+        user_id="Gaurav"
+    )
+
+    print("Memory has been saved ....")
 
 # step to 
 # first install memoai

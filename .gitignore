@@ -1,1 +1,19 @@
+# env
 .env
+
+# python
+__pycache__/
+*.pyc
+
+# vector db
+faiss_db/
+*.faiss
+*.pkl
+memory_db.json
+
+# virtual env
+venv/
+venv311/
+
+# vscode
+.vscode/

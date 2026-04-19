@@ -1,4 +1,10 @@
 import speech_recognition as sr
+from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
+
+client=OpenAI()
 
 def main():
     r=sr.Recognizer() #speech to text
@@ -15,6 +21,28 @@ def main():
         
         #printing that text
         print("You said:",stt)
+        
+        SYSTEM_PROMPT="""
+            you are an expert voice agent whose name 
+            is gaurav alexa. you are given an the transcript
+            of what  user has said using voice.
+            You neeed to generate the output as if you are an voice 
+            agent and whatever you speak will be converted back into the 
+            audio using AI and played back to user.
+            
+        """
+        
+        
+        response=client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[
+                {"role":"system","content":SYSTEM_PROMPT},
+                {"role":"user","content":stt}
+                
+            ]
+        )
+        
+        print("AI Response", response.choices[0].message.content)
         
         
 main()

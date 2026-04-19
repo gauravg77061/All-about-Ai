@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 import os
-
+import json
 
 
 load_dotenv()
@@ -48,10 +48,39 @@ while True:
     
 
     user_query=input(">")
+    
+    if user_query.lower() == "exit":
+        break
+    
+    # it will give the dict of relevant data 
+    
+    search_memory=mem_client.search(query=user_query,filters={"user_id":"Gaurav"})
+    
+    memory_about_user=search_memory
+    
+    #separating only memories
+    
+    memories=[
+        f"ID:{mem.get('id')}\nMemory: {mem.get('memory')}" 
+        for mem in search_memory.get("results")
+    ]
+    
+    #printing these memories
+    print("Found Memories",memories)
+    
+    #passing these memories as a system prompt 
+    
+    SYSTEM_PROMPT=f""" 
+        here is the context abut the user:
+        {json.dumps(memories)}
+    """
+    
+    
 
     response=client.chat.completions.create(
         model="gpt-4.1-mini",
         messages=[
+            {"role":"system","content":SYSTEM_PROMPT},
             {"role":"user","content":user_query}
         ]
     )
@@ -70,18 +99,27 @@ while True:
     )
 
     print("Memory has been saved ....")
+    
+    # step to 
+    # first install memoai
+    # insatll fassi
+    # than do the configuraton of embeddingsa ll and vector db
+    # make one insatnce from mem0
+    # than add that instace by using add method
+    # than run the file and give the prompt to the llm
+    # than u can find the reqquired data unser memory_json.file
+    
+    
+    # 2nd step
+    
+    # searching the relevant memory  by mem_client.search
+    # than fetching the memory because it si stored in dict form
+    # than passing those relevant info as a system prompt
 
-# step to 
-# first install memoai
-# insatll fassi
-# than do the configuraton of embeddingsa ll and vector db
-# make one insatnce from mem0
-# than add that instace by using add method
-# than run the file and give the prompt to the llm
-# than u can find the reqquired data unser memory_json.file
 
 
 
+    
 
 
 

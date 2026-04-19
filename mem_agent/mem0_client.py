@@ -27,6 +27,15 @@ config={
         "provider":"openai",
         "config":{"api_key":OPEN_API_KEY,"model":"gpt-4.1"}
     },
+    "graph_store":{
+        "provider":"neo4j",
+        "config":{
+            "url":"neo4j+s://c7bf4556.databases.neo4j.io",
+            
+            "username":"c7bf4556",
+            "password":"s-eQh8kcQowhhmwPw1INYXvmgEOD0rGPdxfqJCbw6Sc"
+        }
+    },
     "vector_store":{
         "provider":"faiss",
         "config":{
@@ -66,7 +75,7 @@ while True:
     ]
     
     #printing these memories
-    print("Found Memories",memories)
+    # print("Found Memories",memories)
     
     #passing these memories as a system prompt 
     
